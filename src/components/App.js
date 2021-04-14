@@ -28,9 +28,15 @@ const App = () => {
 			created: new Date().toString(),
 		},
 	])
+
+	// Adding the data grabbed from the component to the state
+	function addItem(item){
+		console.log(item)
+	}
+
 	return (
 		<Container>
-			<AddLogItem />
+			<AddLogItem addItem={addItem} />
 			<Table>
 				<thead>
 					<tr>
@@ -42,8 +48,8 @@ const App = () => {
 					</tr>
 				</thead>
 				<tbody>
-					{ logs.map((log) => (
-						<LogItem key={log._id} log={log}/>
+					{logs.map((log) => (
+						<LogItem key={log._id} log={log} />
 					)) }
 				</tbody>
 			</Table>

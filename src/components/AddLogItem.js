@@ -5,15 +5,26 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Button from 'react-bootstrap/Button'
 
-const AddLogItem = () => {
+// Passing function addItem as prop
+const AddLogItem = ({ addItem }) => {
     const [text, setText] = useState('')
     const [user, setUser] = useState('')
     const [priority, setPriority] = useState('')
 
+    const onSubmit = (e) =>{
+        e.preventDefault()
+        // Sending the values
+        addItem({text, user, priority})
+        // Cleaning states
+        setText('')
+        setUser('')
+        setPriority('')
+    }
+
     return (
         <Card className='mt-5 mb-3'>
             <Card.Body>
-                <Form>
+                <Form onSubmit={onSubmit}>
                     <Row className='my-3'>
                         <Col>
                             <Form.Control placeholder='log' value={text} 
@@ -27,7 +38,7 @@ const AddLogItem = () => {
                         </Col>
                         <Col>
                             <Form.Control as='select' value={priority}
-                            onChange={(e) => setPriority(e.taarget.value)}>
+                            onChange={(e) => setPriority(e.target.value)}>
                                 <option value="0">Select Priority</option>
                                 <option value="low">Low</option>
                                 <option value="moderate">Moderate</option>
