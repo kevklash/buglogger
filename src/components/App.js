@@ -31,7 +31,9 @@ const App = () => {
 
 	// Adding the data grabbed from the component to the state
 	function addItem(item){
-		console.log(item)
+		item._id = Math.floor(Math.random() * 1000) + 1000
+		item.created = new Date().toString()
+		setLogs([...logs, item])
 	}
 
 	return (
