@@ -24,6 +24,12 @@ const App = () => {
 		ipcRenderer.on('logs:get', (e, logs) => {
 			setLogs(JSON.parse(logs))
 		})
+
+		// Catching the "clear all logs" event
+		ipcRenderer.on('logs:clear', () => {
+			setLogs([])
+			showAlert('All logs were removed.')
+		})
 	}, [])
 
 	// Adding the data grabbed from the component to the state

@@ -1,6 +1,6 @@
 const path = require('path')
 const url = require('url')
-const { app, BrowserWindow, ipcMain } = require('electron')
+const { app, BrowserWindow, ipcMain, Menu } = require('electron')
 const connectDB = require('./config/db')
 const Log = require('./models/Log')
 
@@ -10,6 +10,8 @@ connectDB()
 let mainWindow
 
 let isDev = false
+// If on Mac
+const isMac = process.platform === 'darwin' ? true : false
 
 if (
 	process.env.NODE_ENV !== undefined &&
@@ -70,21 +72,47 @@ function createMainWindow() {
 	mainWindow.on('closed', () => (mainWindow = null))
 }
 
-app.on('ready', createMainWindow)
+app.on('ready', () => {
+	createMainWindow()
+
+	// Implementing the menu
+	const mainMenu = Menu.buildFromTemplate(menu)
+	Menu.setApplicationMenu(mainMenu)
+})
+
+// Creating a Menu
+const menu = [
+	...(isMac ? [{ role: 'appMenu' }] : []),
+	{
+		role: 'fileMenu'
+	},
+	{
+		role: 'editMenu'
+	},
+	{
+		label: 'Logs',
+		submenu: [
+			{
+				label: 'Clear all logs',
+				click: () => clearLogs(),
+			}
+		]
+	},
+	...(isDev ? [
+		{
+			label: 'Developer',
+			submenu: [
+				{ role: 'reload' },
+				{ role: 'forceReload' },
+				{ type: 'separator' },
+				{ role: 'toggledevtools' }
+			]
+		}
+	] : [])
+]
 
 // Catching the event sent from IPC
 ipcMain.on('logs:load', sendLogs)
-
-// Fetching the data and sending the event back to the renderer
-async function sendLogs(){
-	try {
-		const logs = await Log.find().sort({ created: 1 })
-		// Sending the retrieved logs back to the renderer
-		mainWindow.webContents.send('logs:get', JSON.stringify(logs))
-	} catch (error) {
-		console.log(error)
-	}
-}
 
 // Catching the event with the log/item added to create it in the DB
 ipcMain.on('logs:add', async (e, item) => {
@@ -108,6 +136,29 @@ ipcMain.on('logs:delete', async (e, id) => {
 		console.log(error)		
 	}
 })
+
+// Fetching the data and sending the event with the data back to the renderer
+async function sendLogs(){
+	try {
+		const logs = await Log.find().sort({ created: 1 })
+		// Sending the retrieved logs back to the renderer
+		mainWindow.webContents.send('logs:get', JSON.stringify(logs))
+	} catch (error) {
+		console.log(error)
+	}
+}
+
+// Clear all logs
+async function clearLogs() {
+	try {
+		// Delete all records in the table
+		await Log.deleteMany({})
+		mainWindow.webContents.send('logs:clear')
+		// No need to sendLogs() as logs are not defined anymore, we just need to catch the event
+	} catch (error) {
+		console.log(error)
+	}
+}
 
 app.on('window-all-closed', () => {
 	if (process.platform !== 'darwin') {
