@@ -86,14 +86,26 @@ async function sendLogs(){
 	}
 }
 
-// Catching the event with the log/item added
+// Catching the event with the log/item added to create it in the DB
 ipcMain.on('logs:add', async (e, item) => {
 	// console.log(item)
 	try {
 		await Log.create(item)
+		// Sending the logs again to reload the in the UI
 		sendLogs()
 	} catch (error) {
 		console.log(error)
+	}
+})
+
+// Catching the event with the log/item removed to delete it from the DB
+ipcMain.on('logs:delete', async (e, id) => {
+	try {
+		await Log.findOneAndDelete({ _id: id })
+		// Sending the logs again to reload the in the UI
+		sendLogs()
+	} catch (error) {
+		console.log(error)		
 	}
 })
 

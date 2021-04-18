@@ -47,7 +47,9 @@ const App = () => {
 
 	// Deleting an item
 	function deleteItem(_id){
-		setLogs(logs.filter((item) => item._id !== _id))
+		// setLogs(logs.filter((item) => item._id !== _id))
+		//Sending the event witht the _id to delete the correct log
+		ipcRenderer.send('logs:delete', _id)
 		showAlert('Log Removed')
 	}
 
