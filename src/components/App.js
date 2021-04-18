@@ -1,40 +1,30 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Container from 'react-bootstrap/Container'
 import Table from 'react-bootstrap/Table'
 import Alert from 'react-bootstrap/Alert'
 import LogItem from './LogItem'
 import AddLogItem from './AddLogItem'
+import { ipcRenderer } from 'electron'
 
 const App = () => {
-	const [logs, setLogs] = useState([
-		{
-			_id: 1,
-			text: 'This is log one',
-			priority: 'low',
-			user: 'Kevin',
-			created: new Date().toString(),
-		},
-		{
-			_id: 2,
-			text: 'This is log two',
-			priority: 'moderate',
-			user: 'Alberto',
-			created: new Date().toString(),
-		},
-		{
-			_id: 3,
-			text: 'This is log three',
-			priority: 'high',
-			user: 'Romero',
-			created: new Date().toString(),
-		},
-	])
+	const [logs, setLogs] = useState([])
 
 	const [alert, setAlert] = useState({
 		show: false,
 		message: '',
 		variant: 'success'
 	})
+
+	// Sending event to the main process through the IPC rendederer, it will be caught in main.js
+	// Passing [] empty array as there are no dependencies, to run each time based on the dependency changes
+	useEffect(() =>{
+		ipcRenderer.send('logs:load')
+
+		// Receiving the logs from main window
+		ipcRenderer.on('logs:get', (e, logs) => {
+			setLogs(JSON.parse(logs))
+		})
+	}, [])
 
 	// Adding the data grabbed from the component to the state
 	function addItem(item){
