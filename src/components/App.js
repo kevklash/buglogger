@@ -35,9 +35,13 @@ const App = () => {
 			return false
 		}
 
-		item._id = Math.floor(Math.random() * 1000) + 1000
+		/*item._id = Math.floor(Math.random() * 1000) + 1000
 		item.created = new Date().toString()
-		setLogs([...logs, item])
+		setLogs([...logs, item])*/
+
+		// Sending an event to the main process with the added log\
+		ipcRenderer.send('logs:add', item)
+
 		showAlert('Log Added')
 	}
 

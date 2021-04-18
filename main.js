@@ -86,6 +86,17 @@ async function sendLogs(){
 	}
 }
 
+// Catching the event with the log/item added
+ipcMain.on('logs:add', async (e, item) => {
+	// console.log(item)
+	try {
+		await Log.create(item)
+		sendLogs()
+	} catch (error) {
+		console.log(error)
+	}
+})
+
 app.on('window-all-closed', () => {
 	if (process.platform !== 'darwin') {
 		app.quit()
